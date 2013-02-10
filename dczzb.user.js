@@ -3,7 +3,9 @@
 // @namespace      http://dczzb.daz.kr/
 // @description    디씨찌질반 - 글/댓글 차단기
 // @include        http://gall.dcinside.com/list.php*
+// @match          http://gall.dcinside.com/list.php*
 // ==/UserScript==
+//
 ////////////////////////////////////////////////////////////////////////////////
 //
 // DCZzizilBan(디씨찌질반) v 0.4.2
@@ -53,7 +55,7 @@ function setConfig() {
     // 차단 작업을 실행합니다. 컴퓨터가 느리다면 이 값을 증가시키는 것이 좋습니다.
     // 기본값: 750 / 단위: ms(밀리세컨드), 1000ms = 1초
     // ※ 괄호를 치거나 단위를 달지 마십시오.
-    Interval: 750,
+    Interval: 30000,
 
     // 부가적인 기능을 선택할 수 있습니다.
     // 사용 방법은 차단 아이디/닉네임 입력 방법과 비슷합니다.
@@ -65,7 +67,8 @@ function setConfig() {
     //   * ShowFiltered : 차단된 흔적을 남깁니다.
     //   * HighlightWhites : 화이트리스트에 있는 유저를 강조합니다.
 
-    Options: [ShowFiltered, HighlightWhites],
+    //Options: [ShowFiltered, HighlightWhites],
+    Options: [],
 
     // 사용할 필터를 설정합니다.
     // 스크립트에 대한 이해 없이는 건드리지 않는 것이 좋습니다.
@@ -92,6 +95,11 @@ function Content (type, text, nickname, id, object) {
   this.nickname = nickname;
   this.id = id;
   this.object = object;
+  // object = {
+  //     self:
+  //     nameElem:
+  //     textElem:
+  // }
 }
 
 function Filter (f, action) {
@@ -174,16 +182,17 @@ function deleteContent (c) {
 
 function array_map (arr, f) {
   // apply 'f' to all the members of array 'arr'
-  for (var i in arr)
-    arr[i] = f(arr[i]);
-  return arr; 
+  var i, narr = [];
+  for (i = 0; i < arr.length; i ++)
+    narr[i] = f(arr[i]);
+  return narr; 
 }
 
 function array_filter (arr, f) {
   // apply filter 'f' to array 'arr', and return the result.
   // if 'f(arr[i])' returns false, the member will be remove from 'arr'
-  var narr = new Array();
-  for (var i in arr) 
+  var i, narr = new Array();
+  for (i = 0; i < arr.length; i ++) 
     if (f (arr[i]))
       narr.push(arr[i]); 
   return narr; 
@@ -235,25 +244,23 @@ function ShowFiltered ()
   flush_delbuf = function() {
     array_map(delbuf, function(c) {
       var o = c.object;
+      o.nameElem.innerHTML = "<b>차단돌이</b>";
       if (c.type == 't') {
-        o.cells[2].innerHTML = "<font color=\"gray\">&nbsp;&nbsp;ⓧ&nbsp;&nbsp;해당 글은 차단되었습니다.</font>";
-        o.cells[3].innerHTML = "<b>차단돌이</b>";
+        o.textElem.innerHTML = "<font color=\"gray\">&nbsp;&nbsp;ⓧ&nbsp;&nbsp;해당 글은 차단되었습니다.</font>";
       } else if (c.type == 'c') {
-        o.cells[0].innerHTML = "<b>차단돌이</b>";
-        o.cells[1].innerHTML = "<font color=\"gray\">해당 댓글은 차단되었습니다.</font>";
+        o.textElem.innerHTML = "<font color=\"gray\">해당 댓글은 차단되었습니다.</font>";
       }
     }); 
-    delete delbuf;
-    delbuf = new Array();
+    delbuf.length = 0;
   };
 }
 
 function HighlightWhites () {
   isWhiteUser.action = function(c) {
     if (c.type == 't')
-      c.object.cells[3].style.background="#98fb98";
+      c.object.nameElem.style.background="#98fb98";
     else 
-      c.object.cells[0].style.background="#98fb98";
+      c.object.nameElem.style.background="#98fb98";
   }
 }
 
@@ -263,10 +270,7 @@ function HighlightWhites () {
 //
 
 function is_ReadingThread() {
-  var no = document.getElementsByName('no');
-  if (no && no[0])
-    return true;
-  return false;
+  return (document.querySelector('input[name=no]'))? true: false;
 }
 
 function getThreadList () {
@@ -278,48 +282,63 @@ function getThreadList () {
       }
     ),
     function(row) {
-      var user = row.cells[3].querySelector('a');
       var title = row.cells[2].querySelector('a').innerHTML;
-      return new Content('t', title, user.title, user.name, row);
+      var user = row.cells[3].querySelector('a');
+      var nick, id
+      if (user) {
+        nick = user.title;
+        id = user.getAttribute('name');
+      } else {
+        nick = id = "<운영자>";
+      }
+
+      return new Content('t', title, nick, id, {
+        self: row,
+        nameElem: row.cells[3],
+        textElem: row.cells[2],
+      });
     }
   );
 }
 
 function getCommentList () {
-  var no = document.getElementsByName('no')[0].value;
   return array_map(
     document.querySelector('.comment-table').rows,
     function(row) {
       var user = row.querySelector('.com_name>span');
       var comment = row.querySelector('.com_text>div').firstChild;
-      return new Cotent('c', comment, user.title, user.name, row);
+
+      var cont = new Content('c', comment, user.title, user.getAttribute('name'), {
+        self: row,
+        nameElem: row.querySelector('.com_name'),
+        textElem: row.querySelector('.com_text')
+      });
+      return cont;
     }
   );
 }
 
 function flush_delbuf () {
   // Delete contents in 'delbuf'
-  array_map(
-    delbuf, 
-    function(c) {
-      var tbl = c.object.parentNode;
-      var idx = c.object.rowIndex;
+  array_map(delbuf, function(c) {
+      var tbl = c.object.self.parentNode;
+      var idx = c.object.self.rowIndex;
       tbl.deleteRow(idx);
-      if (c.type == 't') {
-        // remove separator
+
+      // remove separator
+      if (c.type == 't')
         tbl.deleteRow(idx);
-      }
     }
   ); 
-  delete delbuf;
-  delbuf = new Array();
+  delbuf.length = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 function applyFilters (list, filters) {
-  for (var i in list)
-    for (var j in filters)
+  var i, j;
+  for (i = 0; i < list.length; i ++)
+    for (j = 0; j < filters.length; j ++)
       if (filters[j].f (list[i]))
         {
           filters[j].action (list[i]);
@@ -343,7 +362,6 @@ function clearCommentList() {
 //
 
 var Config; setConfig();
-Config.Done = false;
 
 // apply 'Options'
 (function () {
@@ -351,15 +369,10 @@ Config.Done = false;
     (Config.Options[i])();
 })();
 
-zzbmain = (function () {
-  // ietoy does not guarranty the excution point.
-  // so we have to wait untill the page is completly loaded.
-  if (Config.Done) return;
-
+function zzbmain() {
   // check if the list is loaded.
   // this prevents some pointless errors
   if (document.getElementById('TB')) {
-    Config.Done = true;
     clearThreadList();
 
     if (is_ReadingThread()) {
@@ -368,8 +381,10 @@ zzbmain = (function () {
     }
   } else
     setTimeout(zzbmain, Config.Interval);
-});
+}
 zzbmain();
+
+window.zzbConfig = Config;
 
 })();
 
