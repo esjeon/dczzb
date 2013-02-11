@@ -31,10 +31,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 (function(){
-function setConfig() {
+function getConfig() {
 
 ///////////// 설정 /////////////
-  Config = {
+  return {
     // 일반 문자열 혹은 자바스크립트용 정규표현식을 사용할 수 있습니다. 
     // 각 항목에 해당하는 내용을 괄호안에 쓰시면 됩니다.
     // ex) Nickname: ["차단하기","원하는","닉네임"],
@@ -106,11 +106,8 @@ function Content (type, text, nickname, id, object) {
   this.nickname = nickname;
   this.id = id;
   this.object = object;
-  // object = {
-  //     self:
-  //     nameElem:
-  //     textElem:
-  // }
+  // object = { self:, nameElem:, textElem: }
+  }
 }
 
 function Filter (f, action) {
@@ -161,7 +158,7 @@ var isBannedWord = new Filter(
 
 isBannedUser_Thread = new Filter(
   function (c) {
-    return ( array_has (Config.NoThread_ID  , c.id      ) ||
+    return ( array_has (Config.NoThread_ID      , c.id      ) ||
              array_has (Config.NoThread_Nickname, c.nickname) );
   },
   function (c) { deleteContent (c); }
@@ -169,7 +166,7 @@ isBannedUser_Thread = new Filter(
 
 isBannedUser_Comment = new Filter(
   function (c) {
-    return ( array_has (Config.NoComment_ID  , c.id      ) ||
+    return ( array_has (Config.NoComment_ID      , c.id      ) ||
              array_has (Config.NoComment_Nickname, c.nickname) );
   },
   function (c) { deleteContent (c); }
@@ -193,7 +190,7 @@ function deleteContent (c) {
 
 function array_map (arr, f) {
   // apply 'f' to all the members of array 'arr'
-  var i, narr = [];
+  var i, narr = new Array(arr.length);
   for (i = 0; i < arr.length; i ++)
     narr[i] = f(arr[i]);
   return narr; 
@@ -205,40 +202,34 @@ function array_filter (arr, f) {
   var i, narr = new Array();
   for (i = 0; i < arr.length; i ++) 
     if (f (arr[i]))
-      narr.push(arr[i]); 
+      narr.push(arr[i]);
   return narr; 
 }
 
 function array_has (arr, obj) {
   // Check if the array has the given object */
-  return ( array_filter(arr, cmpf_equal(obj)).length > 0 );
+  return ( array_filter(arr, eqf(obj)).length > 0 );
 }
 
 function cmpf (text) {
   // (C)o(M)(P)are (F)unction - A dark magic
   // Returns a function which matches the given text with string/regexp.
   return function(pat) {
-    if (pat.constructor.prototype === String.prototype) {
-      if (text.indexOf(pat) != -1)
-        return true;
-    } else if (pat.constructor.prototype === RegExp.prototype) { 
-      if (text.search(pat) != -1)
-        return true;
-    }
+    if (pat.constructor.prototype === String.prototype)
+      return (text.indexOf(pat) != -1);
+    else if (pat.constructor.prototype === RegExp.prototype)
+      return (text.search(pat) != -1);
     return false;
   };
 }
 
-function cmpf_equal (str) {
+function eqf (str) {
   // Returns a function that checks the equality.
   return function(word) {
-    if (word.constructor.prototype === String.prototype) {
-      if (str === word)
-        return true;
-    } else if (word.constructor.prototype === RegExp.prototype) {
-      if (word.test(str))
-        return true;
-    }
+    if (word.constructor.prototype === String.prototype)
+      return (str === word);
+    else if (word.constructor.prototype === RegExp.prototype)
+      return (word.test(str));
     return false;
   }
 }
@@ -280,7 +271,7 @@ function HighlightWhites () {
 // Parsers
 //
 
-function is_ReadingThread() {
+function isReadingThread() {
   return (document.querySelector('input[name=no]'))? true: false;
 }
 
@@ -372,7 +363,7 @@ function clearCommentList() {
 // Main
 //
 
-var Config; setConfig();
+var Config = getConfig();
 
 // apply 'Options'
 (function () {
@@ -380,22 +371,20 @@ var Config; setConfig();
     (Config.Options[i])();
 })();
 
-function zzbmain() {
+function main() {
   // check if the list is loaded.
   // this prevents some pointless errors
   if (document.getElementById('TB')) {
     clearThreadList();
 
-    if (is_ReadingThread()) {
+    if (isReadingThread()) {
       clearCommentList();
       setInterval (clearCommentList, Config.Interval);
     }
   } else
-    setTimeout(zzbmain, Config.Interval);
+    setTimeout(main, Config.Interval);
 }
-zzbmain();
-
-window.zzbConfig = Config;
+main();
 
 })();
 
