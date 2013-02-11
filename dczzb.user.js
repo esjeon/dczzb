@@ -219,10 +219,10 @@ function cmpf (text) {
   // Returns a function which matches the given text with string/regexp.
   return function(pat) {
     if (pat.constructor.prototype === String.prototype) {
-      if (text.indexOf(pat) >= 0)
+      if (text.indexOf(pat) != -1)
         return true;
     } else if (pat.constructor.prototype === RegExp.prototype) { 
-      if (text.search(pat) >= 0)
+      if (text.search(pat) != -1)
         return true;
     }
     return false;
@@ -233,10 +233,10 @@ function cmpf_equal (str) {
   // Returns a function that checks the equality.
   return function(word) {
     if (word.constructor.prototype === String.prototype) {
-      if (str.length == word.length && str.indexOf(word) == 0)
+      if (str.length === word)
         return true;
     } else if (word.constructor.prototype === RegExp.prototype) {
-      if (str.replace(word, "").length == 0)
+      if (word.test(str))
         return true;
     }
     return false;
