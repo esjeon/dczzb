@@ -233,7 +233,7 @@ function cmpf_equal (str) {
   // Returns a function that checks the equality.
   return function(word) {
     if (word.constructor.prototype === String.prototype) {
-      if (str.length === word)
+      if (str === word)
         return true;
     } else if (word.constructor.prototype === RegExp.prototype) {
       if (word.test(str))
