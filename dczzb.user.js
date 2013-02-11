@@ -107,7 +107,6 @@ function Content (type, text, nickname, id, object) {
   this.id = id;
   this.object = object;
   // object = { self:, nameElem:, textElem: }
-  }
 }
 
 function Filter (f, action) {
