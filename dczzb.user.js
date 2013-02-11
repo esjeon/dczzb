@@ -4,18 +4,27 @@
 // @description    디씨찌질반 - 글/댓글 차단기
 // @include        http://gall.dcinside.com/list.php*
 // @match          http://gall.dcinside.com/list.php*
+// @grant          none
 // ==/UserScript==
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
 // DCZzizilBan(디씨찌질반) v 0.4.2
-// Copyrighted by 땡칠도사 in 프로그래밍 갤러리
 //
-// Firefox 외의 브라우저 지원은 lum34님이 쓰신 IE용 스크립트를 참고하였습니다.
-// 에미야고로님의 아이디어로 만들어졌습니다.
+// Copyrighted (C) 2009-2013 땡칠도사 in 디씨 프로그래밍 갤러리
 //
-// 본 스크립트는 GPL에 따라 누구나 자유롭게 사용하고 배포 및 수정할 수 있습니다.
-// GPL원문: http://www.fsf.org/licensing/licenses/gpl.html
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 ////////////////////////////////////////////////////////////////////////////////
 
