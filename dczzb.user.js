@@ -1,15 +1,17 @@
 // ==UserScript==
 // @name           DCZzizilban
 // @namespace      http://dczzb.daz.kr/
+// @downloadURL    http://userscripts.org/scripts/source/158868.user.js
 // @description    디씨찌질반 - 글/댓글 차단기
+// @version        0.5.0
+// @grant          none
 // @include        http://gall.dcinside.com/list.php*
 // @match          http://gall.dcinside.com/list.php*
-// @grant          none
 // ==/UserScript==
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-// DCZzizilBan(디씨찌질반) v 0.4.2
+// DCZzizilBan(디씨찌질반)
 //
 // Copyrighted (C) 2009-2013 땡칠도사 in 디씨 프로그래밍 갤러리
 //
