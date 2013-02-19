@@ -62,12 +62,6 @@ function getConfig() {
     NoComment_ID: [],
     NoComment_Nickname: [],
 
-    // 댓글 목록이 변경될 경우, 다시 차단을 적용하기 위해 정해진 시간마다 자동으로
-    // 차단 작업을 실행합니다. 컴퓨터가 느리다면 이 값을 증가시키는 것이 좋습니다.
-    // 기본값: 750 / 단위: ms(밀리세컨드), 1000ms = 1초
-    // ※ 괄호를 치거나 단위를 달지 마십시오.
-    Interval: 30000,
-
     // 부가적인 기능을 선택할 수 있습니다.
     // 사용 방법은 차단 아이디/닉네임 입력 방법과 비슷합니다.
     // ex) Options: [ShowFiltered],
@@ -305,7 +299,8 @@ function getCommentList () {
       var nick = (user)? user.title: "<댓글돌이>";
       var id = (user)? user.getAttribute('name'): "<댓글돌이>";
 
-      var comment = row.querySelector('.com_text>div').firstChild;
+      var comment = ( row.querySelector('.com_text>div')
+                    ||row.querySelector('.com_text'    )).firstChild;
 
       var cont = new Content('c', comment, nick, id, {
         self: row,
@@ -368,6 +363,29 @@ var Config = getConfig();
     (Config.Options[i])();
 })();
 
+function bindViewCommentEvent() {
+  // inject script into the page to override new_view_comment2
+  function code() {
+    var old = window.new_view_comment2;
+    window.new_view_comment2 = function() {
+      old.apply(window, arguments);
+      document.querySelector('#dczzb_proxy').onclick();
+    };
+  }
+  var script = document.createElement('script');
+  var text = document.createTextNode('('+ code + ')()');
+  script.appendChild(text);
+  document.body.appendChild(script);
+
+  // proxy that allows us to call functions declared in this scope
+  var proxy = document.createElement('span');
+  proxy.setAttribute('id', 'dczzb_proxy');
+  proxy.onclick = function() {
+    clearCommentList();
+  };
+  document.body.appendChild(proxy);
+}
+
 function main() {
   // check if the list is loaded.
   // this prevents some pointless errors
@@ -376,10 +394,10 @@ function main() {
 
     if (isReadingThread()) {
       clearCommentList();
-      setInterval (clearCommentList, Config.Interval);
+      bindViewCommentEvent();
     }
   } else
-    setTimeout(main, Config.Interval);
+    setTimeout(main, 30);
 }
 main();
 
