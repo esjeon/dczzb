@@ -285,13 +285,8 @@ function getThreadList () {
     function(row) {
       var title = row.cells[2].querySelector('a').innerHTML;
       var user = row.cells[3].querySelector('a');
-      var nick, id
-      if (user) {
-        nick = user.title;
-        id = user.getAttribute('name');
-      } else {
-        nick = id = "<운영자>";
-      }
+      var nick = (user)? user.title: "<운영자>";
+      var id = (user)? user.getAttribute('name'): "<운영자>";
 
       return new Content('t', title, nick, id, {
         self: row,
@@ -307,9 +302,12 @@ function getCommentList () {
     document.querySelector('.comment-table').rows,
     function(row) {
       var user = row.querySelector('.com_name>span');
+      var nick = (user)? user.title: "<댓글돌이>";
+      var id = (user)? user.getAttribute('name'): "<댓글돌이>";
+
       var comment = row.querySelector('.com_text>div').firstChild;
 
-      var cont = new Content('c', comment, user.title, user.getAttribute('name'), {
+      var cont = new Content('c', comment, nick, id, {
         self: row,
         nameElem: row.querySelector('.com_name'),
         textElem: row.querySelector('.com_text')
