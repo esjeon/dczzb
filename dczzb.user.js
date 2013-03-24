@@ -207,6 +207,8 @@ function array_has (arr, obj) {
 function cmpf (text) {
   // (C)o(M)(P)are (F)unction - A dark magic
   // Returns a function which matches the given text with string/regexp.
+  if (text instanceof Text)
+    text = text.wholeText;
   return function(pat) {
     if (pat.constructor.prototype === String.prototype)
       return (text.indexOf(pat) != -1);
