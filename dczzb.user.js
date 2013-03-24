@@ -3,7 +3,7 @@
 // @namespace      http://dczzb.j00s.com/
 // @downloadURL    http://userscripts.org/scripts/source/158868.user.js
 // @description    디씨찌질반 - 글/댓글 차단기
-// @version        0.5.3
+// @version        0.5.4
 // @grant          none
 // @include        http://gall.dcinside.com/list.php*
 // @match          http://gall.dcinside.com/list.php*
@@ -207,9 +207,12 @@ function array_has (arr, obj) {
 function cmpf (text) {
   // (C)o(M)(P)are (F)unction - A dark magic
   // Returns a function which matches the given text with string/regexp.
-  if (text instanceof Text)
-    text = text.wholeText;
   return function(pat) {
+    if (text.wholeText)
+      text = text.wholeText;
+    else if (text.innerHTML)
+      text = text.innerHTML;
+
     if (pat.constructor.prototype === String.prototype)
       return (text.indexOf(pat) != -1);
     else if (pat.constructor.prototype === RegExp.prototype)
