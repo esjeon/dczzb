@@ -3,7 +3,7 @@
 // @namespace      http://dczzb.j00s.com/
 // @downloadURL    http://userscripts.org/scripts/source/158868.user.js
 // @description    디씨찌질반 - 글/댓글 차단기
-// @version        0.5.2
+// @version        0.5.3
 // @grant          none
 // @include        http://gall.dcinside.com/list.php*
 // @match          http://gall.dcinside.com/list.php*
